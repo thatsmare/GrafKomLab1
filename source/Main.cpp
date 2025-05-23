@@ -113,7 +113,7 @@ protected:
 	void init(int screenW, int screenH) {
 		// Choose size
 		render.size = static_cast<Renderable::Size>(1 << GetRandomValue(0, 2));
-
+		float radius = GetRadius();
 		// Spawn at random edge
 		switch (GetRandomValue(0, 3)) {
 		case 0:
@@ -222,7 +222,7 @@ public:
 	}
 private:
 	Texture2D texture;
-	float scale = 0.25f;
+	float scale = 0.2f;
 };
 
 // Shape selector
@@ -502,13 +502,12 @@ public:
 				if (player->IsAlive() && IsKeyDown(KEY_M)) {
 					bottomShotTimer += dt;
 					float interval = 1.f / player->GetFireRate(currentWeapon);
-					float projSpeed = player->GetSpacing(currentWeapon) * player->GetFireRate(currentWeapon);
+					float projSpeed = -player->GetSpacing(currentWeapon) * player->GetFireRate(currentWeapon);
 
 					while (bottomShotTimer >= interval) {
 						Vector2 p = player->GetPosition();
 						p.y += player->GetRadius();
-						Vector2 velocity = { 0, projSpeed };
-						projectiles.emplace_back(p, velocity, (currentWeapon == WeaponType::LASER ? 20 : 10), currentWeapon);
+						projectiles.push_back(MakeProjectile(currentWeapon,p, projSpeed));
 						bottomShotTimer -= interval;
 					}
 				}
@@ -546,7 +545,7 @@ public:
 					if (dist < (*pit).GetRadius() + (*ait)->GetRadius()) {
 						ait = asteroids.erase(ait);
 						pit = projectiles.erase(pit);
-						player-> IncreaseScore(10);
+						player-> IncreaseScore((*ait)->GetDamage());
 						removed = true;
 						break;
 					}
@@ -637,5 +636,6 @@ int main() {
 
 //Things done:
 // - added bottom shooting 
-// - changed asteroid to png
+// - changed asteroids to pngs
 // - raised the time intervals between asteroids bc my laptop couldn't handle them
+// - added score 
